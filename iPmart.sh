@@ -94,7 +94,7 @@ sudo systemctl start apache2
 ufw allow 'Apache Full'
 sudo systemctl restart apache2
 
-colorized_echo green "Installing Zanbor . . ."
+colorized_echo green "Installing iPmart Bot Panel . . ."
 
 sleep 2
 
@@ -111,9 +111,9 @@ sudo systemctl restart apache2.service
 
 wait
 
-git clone https://github.com/ZanborPanel/ZanborPanel.git /var/www/html/iPmartBotPanel
+git clone https://github.com/iPmartNetwork/iPmart-Bot-Panel.git /var/www/html/iPmartBotPanel
 sudo chmod -R 777 /var/www/html/iPmartBotPanel/
-colorized_echo green "\n\tAll ZanborPanel robot files/folders have been successfully installed on your server!"
+colorized_echo green "\n\tAll iPmartPanel robot files/folders have been successfully installed on your server!"
 
 wait
 
