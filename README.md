@@ -8,6 +8,4 @@
 <h6 align="center">iPmart-Bot-Panel<h6>
 </p>
 
-<p align="center">
-<img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/ipmartnetwork/iPmart-SSH">
-</p>
+
