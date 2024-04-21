@@ -228,7 +228,7 @@ colorized_echo blue "\n\nSet Webhook Status:"
 curl -F "url=https://${DOMAIN}/iPmartBotPanel/index.php" "https://api.telegram.org/bot${TOKEN}/setWebhook"
 
 colorized_echo blue "\n\nSend Message Status:"
-TEXT_MESSAGE="✅ The ZanborPanel Bot Has Been Successfully Installed !"
+TEXT_MESSAGE="✅ The iPmart Bot Panel Has Been Successfully Installed !"
 curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" -d chat_id="${CHAT_ID}" -d text="${TEXT_MESSAGE}"
 echo -e "\n\n"
 
