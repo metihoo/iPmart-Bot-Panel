@@ -2712,5 +2712,5 @@ if ($from_id == $config['dev'] or in_array($from_id, $admins)) {
 * Project name: iPmart_Network
 * Channel: @iPmart_Network
 * Group: @iPmart_NetworkGap
- * Version: 2.5
+ * Version: 1.2
 **/
