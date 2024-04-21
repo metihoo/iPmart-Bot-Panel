@@ -800,7 +800,7 @@ $admins = $sql->query("SELECT * FROM `admins`")->fetch_assoc() ?? [];
 if ($from_id == $config['dev'] or in_array($from_id, $admins)) {
     if (in_array($text, ['/panel', 'panel', '🔧 مدیریت', 'پنل', '⬅️ بازگشت به مدیریت'])) {
         step('panel');
-       sendMessage($from_id, "👮‍♂️ - سلام ادمین [ <b>$first_name</b> ] عزیز !\n\n⚡️به پنل مدیریت ربات خوش آمدید.\n🗃 ورژن فعلی ربات : <code>{$config['version']}</code>\n\n⚙️ جهت مدیریت ربات ، یکی از گزینه های زیر را انتخاب کنید.\n\n | برای اطلاع از تمامی آپدیت ها و نسخه های بعدی ربات ای پی مارت پنل در کانال ای پی مارت پنل عضو شید :↓\n◽️@ipmartpanel\n و همچنین برای نظر دهی آپدیت یا باگ ها به گروه ای پی مارت پنل بپیوندید :↓\n◽️@ipmartnetworkgp", $panel);    
+       sendMessage($from_id, "👮‍♂️ - سلام ادمین [ <b>$first_name</b> ] عزیز !\n\n⚡️به پنل مدیریت ربات خوش آمدید.\n🗃 ورژن فعلی ربات : <code>{$config['version']}</code>\n\n⚙️ جهت مدیریت ربات ، یکی از گزینه های زیر را انتخاب کنید.\n\n | برای اطلاع از تمامی آپدیت ها و نسخه های بعدی ربات ای پی مارت پنل در کانال ای پی مارت پنل عضو شید :↓\n◽️@ipmartpanel\n و همچنین برای نظر دهی آپدیت یا باگ ها به گروه ای پی مارت پنل بپیوندید :↓\n◽️@iPmartNetwork_GP", $panel);    
     }
     
     elseif($text == '👥 مدیریت آمار ربات'){
@@ -918,7 +918,7 @@ if ($from_id == $config['dev'] or in_array($from_id, $admins)) {
     elseif ($text == '❌ انصراف و بازگشت') {
         step('none');
         if (file_exists('add_panel.txt')) unlink('add_panel.txt');
-        sendMessage($from_id, "⚙️ به مدیریت پلن ها خوش آمدید.\n\n👇🏻یکی از گزینه های زیر را انتخاب کنید :\n\n◽️@iPmart_Network", $manage_server);
+        sendMessage($from_id, "⚙️ به مدیریت پلن ها خوش آمدید.\n\n👇🏻یکی از گزینه های زیر را انتخاب کنید :\n\n@iPmart_Network", $manage_server);
     }
     
     elseif ($data == 'close_panel') {
