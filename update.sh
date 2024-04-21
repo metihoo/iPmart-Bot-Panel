@@ -50,7 +50,7 @@ do
             if [ "$answer" != "${answer#[Yy]}" ]; then
                 if [ -d "/var/www/html/ZanborPanelBot" ]; then
                     if [ -f "/var/www/html/ZanborPanelBot/install/iPmart.install" ]; then
-                        if [ -s "/var/www/html/iPmartPanelBot/install/zanbor.install" ]; then
+                        if [ -s "/var/www/html/iPmartPanelBot/install/iPmart.install" ]; then
                             colorized_echo green "Please wait, Updating . . ."
                             # update proccess !
                             sudo apt update && apt upgrade -y
@@ -138,13 +138,13 @@ do
 
                     sleep 2
 
-                    TEXT_MESSAGE="❌ The iPmartPanel Bot Has Been Successfully Deleted -> @iPmartPanel | @iPmartPanelGap"
+                    TEXT_MESSAGE="❌ The iPmartPanel Bot Has Been Successfully Deleted -> @iPmart_network | @iPmartPanel_Gp"
                     curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" -d chat_id="${CHAT_ID}" -d text="${TEXT_MESSAGE}"
 
                     sleep 2
                     echo -e "\n"
                     colorized_echo green "[+] The iPmartPanel Bot Has Been Successfully Deleted"
-                    colorized_echo green "[+] Telegram channel: @iPmartPanel || Telegram group: @iPmartPanelGap"
+                    colorized_echo green "[+] Telegram channel: @iPmart_network | @iPmartPanel_Gp"
                     echo -e "\n"
                 else
                     echo -e "\n"
@@ -162,7 +162,7 @@ do
             break;;
         "Donate")
             echo -e "\n"
-            colorized_echo green "[+] Bank Meli: 6037998195739130\n\n[+] Tron (TRX): TAwNcAYrHp2SxhchywA6NhUEF4aVwJHufD\n\n[+] ETH, BNB, MATIC network (ERC20, BEP20): 0x36c5109885b59Ddd0cA4ea497765d326eb48396F\n\n[+] Bitcoin network: bc1qccunjllf2guca7dhwyw2x3u80yh4k0hg88yvpk" 
+            colorized_echo green "[+] Bank Meli: 5022291506874237\n\n[+] Tron (TRX): TJbTYV1fFo2485sYMyajxGPLFzxmNmPrNA\n\n[+] , BNB (BEP20): 0x4af3de9b303a8d43105e284823d95b4c600961a3\n\n[+] Bitcoin network: bc1q0wc04pj7fn2r7dma2v7thzxetaquf7mdpqlg8t" 
             echo -e "\n"
             exit 0
 
