@@ -47,7 +47,7 @@ bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.
 ```
 
 ## امکانات ربات ای پی مارت پنل
-- دیزاین شیک و خاش
+
 - مولتی پنل
 - افزودن پنل
 - ساپورت از پنل سنایی و علیرضا و مرزبان و هیدیفای
