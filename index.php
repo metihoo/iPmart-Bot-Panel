@@ -10,7 +10,6 @@
 
 include_once 'config.php';
 include_once 'api/sanayi.php';
-include_once 'api/alireza.php';
 # include_once  'api/hiddify.php';
 
 
@@ -247,40 +246,6 @@ elseif($user['step'] == 'confirm_service' and $text == '☑️ ایجاد سرو
     $sql->query("UPDATE `users` SET `coin` = coin - $price, `count_service` = count_service + 1 WHERE `from_id` = '$from_id' LIMIT 1");
 }
 
-    } elseif ($panel['type'] == 'alireza') {
-
-        include_once 'api/alireza.php';
-        $xui = new alireza($panel['login_link'], $panel['token']);
-        $san_setting = $sql->query("SELECT * FROM `alireza_panel_setting` WHERE `code` = '{$panel['code']}'")->fetch_assoc();
-        $create_service = $xui->addClient($name, $san_setting['inbound_id'], $date, $limit);
-        $create_status = json_decode($create_service, true);
-        # ---------------- check errors ---------------- #
-        if ($create_status['status'] == false) {
-            sendMessage($from_id, sprintf($texts['create_error'], 1), $start_key);
-            exit();
-        }
-        # ---------------- get links and subscription_url for send the user ---------------- #
-        if ($info_panel->num_rows > 0) {
-            $getMe = json_decode(file_get_contents("https://api.telegram.org/bot{$config['token']}/getMe"), true);
-            $link = str_replace(['%s1', '%s2', '%s3'], [$create_status['results']['id'], str_replace(parse_url($panel['login_link'])['port'], json_decode($xui->getPortById($san_setting['inbound_id']), true)['port'], str_replace(['https://', 'http://'], ['', ''], $panel['login_link'])), $create_status['results']['remark']], $san_setting['example_link']);
-            if ($panel['qr_code'] == 'active') {
-                $encode_url = urlencode($link);
-                bot('sendPhoto', ['chat_id' => $from_id, 'photo' => "https://api.qrserver.com/v1/create-qr-code/?data=$encode_url&size=800x800", 'caption' => sprintf($texts['success_create_service_alireza'], $name, $location, $date, $limit, number_format($price), $link, $create_status['results']['subscribe'], '@' . $getMe['result']['username']), 'parse_mode' => 'html', 'reply_markup' => $start_key]);
-            } else {
-                sendMessage($from_id, sprintf($texts['success_create_service_alireza'], $name, $location, $date, $limit, number_format($price), $link, $create_status['results']['subscribe'], '@' . $getMe['result']['username']), $start_key);
-            }
-            $sql->query("INSERT INTO `orders` (`from_id`, `location`, `protocol`, `date`, `volume`, `link`, `price`, `code`, `status`, `type`) VALUES ('$from_id', '$location', 'null', '$date', '$limit', '$link', '$price', '$code', 'active', 'alireza')");
-            // sendMessage($config['dev'], sprintf($texts['success_create_notif']), $first_name, $username, $from_id, $user['count_service'], $user['coin'], $location, $plan, $limit, $date, $code, number_format($price));
-        }else{
-            sendMessage($from_id, sprintf($texts['create_error'], 2), $start_key);
-            exit();
-        }
-    }
-    $sql->query("DELETE FROM `service_factors` WHERE `from_id` = '$from_id'");
-    $sql->query("UPDATE `users` SET `coin` = coin - $price, `count_service` = count_service + 1 WHERE `from_id` = '$from_id' LIMIT 1");
-}
-
-
 elseif ($text == '🎁 سرویس تستی (رایگان)' and $test_account_setting['status'] == 'active') {
     step('none');
     if ($user['test_account'] == 'no') {
@@ -336,37 +301,6 @@ elseif ($text == '🎁 سرویس تستی (رایگان)' and $test_account_set
                 $name = base64_encode($code) . '_' . $from_id;
                 $xui = new Sanayi($panel_fetch['login_link'], $panel_fetch['token']);
                 $san_setting = $sql->query("SELECT * FROM `sanayi_panel_setting` WHERE `code` = '{$panel_fetch['code']}'")->fetch_assoc();
-                $create_service = $xui->addClient($name, $san_setting['inbound_id'], $test_account_setting['volume'], ($test_account_setting['time'] / 24));
-                $create_status = json_decode($create_service, true);
-                $link = str_replace(['%s1', '%s2', '%s3'], [$create_status['results']['id'], str_replace(parse_url($panel_fetch['login_link'])['port'], json_decode($xui->getPortById($san_setting['inbound_id']), true)['port'], str_replace(['https://', 'http://'], ['', ''], $panel_fetch['login_link'])), $create_status['results']['remark']], $san_setting['example_link']);
-                # ---------------- check errors ---------------- #
-                if ($create_status['status'] == false) {
-                    sendMessage($from_id, sprintf($texts['create_error'], 1), $start_key);
-                    exit();
-                }
-                # ---------------------------------------------- #
-                $sql->query("UPDATE `users` SET `count_service` = count_service + 1, `test_account` = 'yes' WHERE `from_id` = '$from_id'");
-                $sql->query("INSERT INTO `test_account` (`from_id`, `location`, `date`, `volume`, `link`, `price`, `code`, `status`) VALUES ('$from_id', '{$panel_fetch['name']}', '{$test_account_setting['date']}', '{$test_account_setting['volume']}', '$link', '0', '$code', 'active')");
-                deleteMessage($from_id, $message_id + 1);
-                sendMessage($from_id, sprintf($texts['create_test_account'], $test_account_setting['time'], $link, $panel_fetch['name'], $test_account_setting['time'], $test_account_setting['volume'], base64_encode($code)), $start_key);
-            }
-        } catch (\Throwable $e) {
-            sendMessage($config['dev'], $e);
-        }
-
-    } else {
-        sendMessage($from_id, $texts['already_test_account'], $start_key);
-    }
-}
-
-            }
-
-            if ($panel_fetch['type'] == 'alireza') {
-                include_once 'api/alireza.php';
-                $code = rand(111111, 999999);
-                $name = base64_encode($code) . '_' . $from_id;
-                $xui = new Alireza($panel_fetch['login_link'], $panel_fetch['token']);
-                $san_setting = $sql->query("SELECT * FROM `alireza_panel_setting` WHERE `code` = '{$panel_fetch['code']}'")->fetch_assoc();
                 $create_service = $xui->addClient($name, $san_setting['inbound_id'], $test_account_setting['volume'], ($test_account_setting['time'] / 24));
                 $create_status = json_decode($create_service, true);
                 $link = str_replace(['%s1', '%s2', '%s3'], [$create_status['results']['id'], str_replace(parse_url($panel_fetch['login_link'])['port'], json_decode($xui->getPortById($san_setting['inbound_id']), true)['port'], str_replace(['https://', 'http://'], ['', ''], $panel_fetch['login_link'])), $create_status['results']['remark']], $san_setting['example_link']);
@@ -477,38 +411,6 @@ elseif (strpos($data, 'service_status-') !== false) {
     }
 }
 
-    } elseif ($panel['type'] == 'alireza') {
-
-        include_once 'api/alireza.php';
-        $san_setting = $sql->query("SELECT * FROM `alireza_panel_setting` WHERE `code` = '{$panel['code']}'")->fetch_assoc();
-        $xui = new Alireza($panel['login_link'], $panel['token']);
-        $getUser = $xui->getUserInfo(base64_encode($code) . '_' . $from_id, $san_setting['inbound_id']);
-        $getUser = json_decode($getUser, true);
-        if ($getUser['status']) {
-            $note = $sql->query("SELECT * FROM `notes` WHERE `code` = '$code'");
-            $order = $sql->query("SELECT * FROM `orders` WHERE `code` = '$code'")->fetch_assoc();
-            $link = $order['link'];
-
-            $manage_service_btns = json_encode(['inline_keyboard' => [    
-                // [['text' => 'تنظیمات دسترسی', 'callback_data' => 'access_settings-'.$code.'-alireza']],
-                [['text' => 'خرید حجم اضافه', 'callback_data' => 'buy_extra_volume-'.$code.'-alireza'], ['text' => 'افزایش اعتبار زمانی', 'callback_data' => 'buy_extra_time-'.$code.'-alireza']],
-                [['text' => 'نوشتن یادداشت', 'callback_data' => 'write_note-'.$code.'-alireza'], ['text' => 'دریافت QrCode', 'callback_data' => 'getQrCode-'.$code.'-alireza']],
-                [['text' => '🔙 بازگشت', 'callback_data' => 'back_services']]
-            ]]);
-
-            if ($note->num_rows == 0) {
-                editMessage($from_id, sprintf($texts['your_service'], ($getUser['result']['enable'] == true) ? '🟢 فعال' : '🔴 غیرفعال', $getService['location'], base64_encode($code), Conversion($getUser['result']['up'] + $getUser['result']['down'], 'GB'), ($getUser['result']['total'] == 0) ? 'نامحدود' : Conversion($getUser['result']['total'], 'GB') . ' MB', date('Y-d-m H:i:s',  $getUser['result']['expiryTime']), $link), $message_id, $manage_service_btns);
-            } else {
-                $note = $note->fetch_assoc();
-                editMessage($from_id, sprintf($texts['your_service_with_note'], ($getUser['result']['enable'] == true) ? '🟢 فعال' : '🔴 غیرفعال', $note['note'], $getService['location'], base64_encode($code), Conversion($getUser['result']['up'] + $getUser['result']['down'], 'GB'), ($getUser['result']['total'] == 0) ? 'نامحدود' : Conversion($getUser['result']['total'], 'GB') . ' MB', date('Y-d-m H:i:s',  $getUser['result']['expiryTime']), $link), $message_id, $manage_service_btns);
-            }
-        } else {
-            $sql->query("DELETE FROM `orders` WHERE `code` = '$code'");
-            alert($texts['not_found_service']);
-        }
-
-    }
-}
 elseif (strpos($data, 'getQrCode') !== false) {
     alert($texts['wait']);
 
@@ -535,15 +437,6 @@ elseif (strpos($data, 'getQrCode') !== false) {
     } else {
         alert('❌ Error -> not found type !', true);
     }
-	    } elseif ($type == 'sanayi') {
-        $order = $sql->query("SELECT * FROM `orders` WHERE `code` = '$code'")->fetch_assoc();
-        $link = $order['link'];
-        $encode_url = urlencode($link);
-        bot('sendPhoto', ['chat_id' => $from_id, 'photo' => "https://api.qrserver.com/v1/create-qr-code/?data=$encode_url&size=800x800", 'caption' => "<code>$link</code>", 'parse_mode' => 'html']);
-    } else {
-        alert('❌ Error -> not found type !', true);
-    }
-
 }
 
 elseif (strpos($data, 'write_note') !== false) {
@@ -1240,59 +1133,6 @@ if ($from_id == $config['dev'] or in_array($from_id, $admins)) {
         foreach (['add_panel.txt', 'cookie.txt'] as $file) if (file_exists($file)) unlink($file);
     }
     
-	    # ------------- Alireza ------------- #
-
-    elseif ($data == 'alireza') {
-        step('add_server_sanayi');
-        deleteMessage($from_id, $message_id);
-        sendMessage($from_id, "‌👈🏻⁩ اسم پنل خود را به دلخواه ارسال کنید :↓\n\nمثال نام : 🇳🇱 - هلند\n• این اسم برای کاربران قابل نمایش است.", $cancel_add_server);
-    }
-    
-    elseif ($user['step'] == 'add_server_sanayi') {
-        if ($sql->query("SELECT `name` FROM `panels` WHERE `name` = '$text'")->num_rows == 0) {
-            step('send_address_sanayi');
-            file_put_contents('add_panel.txt', "$text\n", FILE_APPEND);
-            sendMessage($from_id, "🌐 آدرس لاگین به پنل را ارسال کنید.\n\n- example:\n http://1.1.1.1:8000\n http://1.1.1.1:8000/vrshop\n http://domain.com:8000", $cancel_add_server);
-        } else {
-            sendMessage($from_id, "❌ پنلی با نام [ <b>$text</b> ] قبلا در ربات ثبت شده !", $cancel_add_server);
-        }
-    }
-    
-    elseif ($user['step'] == 'send_address_sanayi') {
-        if (preg_match("/^(http|https):\/\/(\d+\.\d+\.\d+\.\d+|.*)\:.*$/", $text)) {
-            if ($sql->query("SELECT `login_link` FROM `panels` WHERE `login_link` = '$text'")->num_rows == 0) {
-                step('send_username_sanayi');
-                file_put_contents('add_panel.txt', "$text\n", FILE_APPEND);
-                sendMessage($from_id, "🔎 - یوزرنیم ( <b>username</b> ) پنل خود را ارسال کنید :", $cancel_add_server);
-            } else {
-            sendMessage($from_id, "❌ پنلی با ادرس [ <b>$text</b> ] قبلا در ربات ثبت شده !", $cancel_add_server);
-        }
-        } else {
-            sendMessage($from_id, "🚫 لینک ارسالی شما اشتباه است !", $cancel_add_server);
-        }
-    }
-    
-    elseif ($user['step'] == 'send_username_alireza') {
-        step('send_password_sanayi');
-        file_put_contents('add_panel.txt', "$text\n", FILE_APPEND);
-        sendMessage($from_id, "🔎 - پسورد ( <b>password</b> ) سرور خود را ارسال کنید :", $cancel_add_server);
-    }
-    
-    elseif ($user['step'] == 'send_password_sanayi') {
-        step('none');
-        $info = explode("\n", file_get_contents('add_panel.txt'));
-        $response = loginPanelSanayi($info[1], $info[2], $text);
-        if ($response['success']) {
-            $code = rand(11111111, 99999999);
-            $session = str_replace([" ", "\n", "\t"], ['', '', ''], explode('session	', file_get_contents('cookie.txt'))[1]);
-            $sql->query("INSERT INTO `panels` (`name`, `login_link`, `username`, `password`, `token`, `code`, `status`, `type`) VALUES ('{$info[0]}', '{$info[1]}', '{$info[2]}', '$text', '$session', '$code', 'inactive', 'alireza')");
-            $sql->query("INSERT INTO `sanayi_panel_setting` (`code`, `inbound_id`, `example_link`, `flow`) VALUES ('$code', 'none', 'none', 'offflow')");
-            sendMessage($from_id, "✅ ربات با موفقیت به پنل شما لاگین شد!\n\n▫️یوزرنیم : <code>{$info[2]}</code>\n▫️پسورد : <code>{$text}</code>\n▫️کد پیگیری : <code>$code</code>", $manage_server);
-        } else {
-            sendMessage($from_id, "❌ لاگین به پنل با خطا مواجه شد , بعد از گذشت چند دقیقه مجددا تلاش کنید !\n\n🎯 دلایل ممکن متصل نشدن ربات به پنل شما :↓\n\n◽باز نبودن پورت مورد نظر\n◽باز نشدن آدرس ارسالی\n◽آدرس ارسالی اشتباه\n◽یوزرنیم یا پسورد اشتباه\n◽قرار گرفتن آی‌پی در بلاک لیست\n◽️باز نبودن دسترسی CURL\n◽️مشکل کلی هاست", $manage_server);
-        }
-        foreach (['add_panel.txt', 'cookie.txt'] as $file) if (file_exists($file)) unlink($file);
-    }
     # ------------- marzban ------------- #
     
     elseif ($data == 'marzban') {
@@ -1544,17 +1384,6 @@ if ($from_id == $config['dev'] or in_array($from_id, $admins)) {
 	            [['text' => 'shadowsocks [' . $shadowsocks_status . ']', 'callback_data' => 'change_protocol|shadowsocks-' . $code]],
 	            [['text' => '🔙 بازگشت به لیست پنل ها', 'callback_data' => 'back_panellist']],
 	        ]]);
-				    } elseif ($info_server['type'] == 'alireza') {
-		    $back_panellist = json_encode(['inline_keyboard' => [
-	            [['text' => '🆙 آپدیت اطلاعات', 'callback_data' => 'update_panel-' . $code]],
-	            [['text' => '🔎 - Status :', 'callback_data' => 'null'], ['text' => $info_server['status'] == 'active' ? '✅' : '❌', 'callback_data' => 'change_status_panel-' . $code]],
-	            [['text' => '🗑 حذف پنل', 'callback_data' => 'delete_panel-' . $code], ['text' => '✍️ تغییر نام', 'callback_data' => 'change_name_panel-' . $code]],
-	            [['text' => '🆔 تنظیم اینباند برای ساخت سرویس', 'callback_data' => 'set_inbound_alireza-'.$code]],
-				[['text' => '🌐 تنظیم نمونه لینک ( سرویس ) برای تحویل', 'callback_data' => 'set_example_link_alireza-'.$code]],
-	            [['text' => 'vmess - [' . $vmess_status . ']', 'callback_data' => 'change_protocol|vmess-' . $code], ['text' => 'trojan [' . $trojan_status . ']', 'callback_data' => 'change_protocol|trojan-' . $code], ['text' => 'vless [' . $vless_status . ']', 'callback_data' => 'change_protocol|vless-' . $code]],
-	            [['text' => 'shadowsocks [' . $shadowsocks_status . ']', 'callback_data' => 'change_protocol|shadowsocks-' . $code]],
-	            [['text' => '🔙 بازگشت به لیست پنل ها', 'callback_data' => 'back_panellist']],
-	        ]]);
         }
         editMessage($from_id, $txt, $message_id, $back_panellist);
     }
@@ -1647,42 +1476,8 @@ if ($from_id == $config['dev'] or in_array($from_id, $admins)) {
         $code = explode('-', $data)[1];
         step('set_example_link_sanayi-'.$code);
         sendMessage($from_id, "✏️ نمونه سرویس خود را با توجه به توضیحات زیر ارسال کنید :\n\n▫️به جای جاهای متغیر هر قسمت در لینک سرویس ارسالی مقدار s1 و %s2 و ...% رو جایگزین کنید.\n\nبرای مثال لینک دریافتی :\n\n<code>vless://a8eff4a8-226d3343bbf-9e9d-a35f362c4cb4@1.1.1.1:2053?security=reality&type=grpc&host=&headerType=&serviceName=xyz&sni=cdn.discordapp.com&fp=chrome&pbk=SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc&sid=&spx=#iPmart_Network</code>\n\nو لینک ارسالی شما به ربات باید به شرح زیر باشد ( نمونه ) :\n\n<code>vless://%s1@%s2?security=reality&type=grpc&host=&headerType=&serviceName=xyz&sni=cdn.discordapp.com&fp=chrome&pbk=SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc&sid=&spx=#%s3</code>\n\n⚠️ به صورت صحیح ارسال کنید در غیر این صورت ربات موقع خرید سرویس با خطا مواجه خواهد شد", $back_panel);
-	}
-	    elseif (strpos($data, 'set_inbound_sanayi') !== false) {
-        $code = explode('-', $data)[1];
-        step('send_inbound_id-'.$code);
-        sendMessage($from_id, "👇 آیدی سرویس مادر که قرار است کلاینت ها داخل آن اد شود را ارسال کنید : ( id ) :", $back_panel);
     }
     
-    elseif (strpos($user['step'], 'send_inbound_id') !== false) {
-        if (is_numeric($text)) {
-            $code = explode('-', $user['step'])[1];
-            $info_panel = $sql->query("SELECT * FROM `panels` WHERE `code` = '$code'")->fetch_assoc();
-            include_once 'api/sanayi.php';
-            $xui = new Sanayi($info_panel['login_link'], $info_panel['token']);
-            $id_status = json_decode($xui->checkId($text), true)['status'];
-            if ($id_status == true) {
-                step('none');
-                if ($sql->query("SELECT * FROM `sanayi_panel_setting` WHERE `code` = '$code'")->num_rows > 0) {
-                    $sql->query("UPDATE `sanayi_panel_setting` SET `inbound_id` = '$text' WHERE `code` = '$code'");
-                } else {
-                    $sql->query("INSERT INTO `sanayi_panel_setting` (`code`, `inbound_id`, `example_link`, `flow`) VALUES ('$code', '$text', 'none', 'offflow')");
-                }
-                sendMessage($from_id, "✅ با موفقیت تنظیم شد !", $manage_server);
-            } else {
-                sendMessage($from_id, "❌ اینباندی با ایدی <code>$text</code> پیدا نشد !", $back_panel);
-            }
-        } else {
-            sendMessage($from_id, "❌ مقدار ورودی باید فقط عدد باشد !", $back_panel);
-        }
-    }
-    
-    elseif (strpos($data, 'set_example_link_alireza') !== false) {
-        $code = explode('-', $data)[1];
-        step('set_example_link_alireza-'.$code);
-        sendMessage($from_id, "✏️ نمونه سرویس خود را با توجه به توضیحات زیر ارسال کنید :\n\n▫️به جای جاهای متغیر هر قسمت در لینک سرویس ارسالی مقدار s1 و %s2 و ...% رو جایگزین کنید.\n\nبرای مثال لینک دریافتی :\n\n<code>vless://a8eff4a8-226d3343bbf-9e9d-a35f362c4cb4@1.1.1.1:2053?security=reality&type=grpc&host=&headerType=&serviceName=xyz&sni=cdn.discordapp.com&fp=chrome&pbk=SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc&sid=&spx=#iPmart_Network</code>\n\nو لینک ارسالی شما به ربات باید به شرح زیر باشد ( نمونه ) :\n\n<code>vless://%s1@%s2?security=reality&type=grpc&host=&headerType=&serviceName=xyz&sni=cdn.discordapp.com&fp=chrome&pbk=SbVKOEMjK0sIlbwg4akyBg5mL5KZwwB-ed4eEE7YnRc&sid=&spx=#%s3</code>\n\n⚠️ به صورت صحیح ارسال کنید در غیر این صورت ربات موقع خرید سرویس با خطا مواجه خواهد شد", $back_panel);
-        
-		}
     elseif (strpos($user['step'], 'set_example_link_sanayi') !== false) {
         if (strpos($text, '%s1') !== false and strpos($text, '%s3') !== false) {
             step('none');
