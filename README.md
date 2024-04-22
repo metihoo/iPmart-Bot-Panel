@@ -14,7 +14,7 @@
 
 
  ## آموزش راه اندازی و نصب ربات روی سرور
-- وارد سرور خود شوید.
+- وارد سرور خود شوید. 
 - دستور زیر رو برای نصب ربات ارسال کنید.
 ```bash
 bash <(curl -s https://raw.githubusercontent.com/ipmartnetwork/iPmart-Bot-Panel/main/iPmart.sh)
