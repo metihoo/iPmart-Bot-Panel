@@ -43,7 +43,7 @@ bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.
 - در صورت صحیح بودن یوزرنیم ارسالی ربات شما ساخته خواهد شد.
 - نمونه توکن ربات :
 ```bash
-7070537549:AAF4XrfBVhoiCsvODRmhLv8irPwqofG6s9Q
+7070537549:AAF4XrfBVhoiCsvODRmhLv8i-----s9Q
 ```
 
 ## امکانات ربات ای پی مارت پنل
