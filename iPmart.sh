@@ -209,8 +209,8 @@ colorized_echo green "[+] Please wait . . .\n"
 sleep 1
 
 # add information to file
-# touch('/var/www/html/iPmartBotPanel/install/zanbor.install')
-echo "{\"development\":\"@ipmart_network\",\"install_location\":\"server\",\"main_domin\":\"${DOMAIN}\",\"token\":\"${TOKEN}\",\"dev\":\"${CHAT_ID}\",\"db_name\":\"${dbname}\",\"db_username\":\"${randdbdb}\",\"db_password\":\"${randdbpass}\"}" > /var/www/html/iPmartBotPanel/install/zanbor.install
+# touch('/var/www/html/iPmartBotPanel/install/iPmart.install')
+echo "{\"development\":\"@ipmart_network\",\"install_location\":\"server\",\"main_domin\":\"${DOMAIN}\",\"token\":\"${TOKEN}\",\"dev\":\"${CHAT_ID}\",\"db_name\":\"${dbname}\",\"db_username\":\"${randdbdb}\",\"db_password\":\"${randdbpass}\"}" > /var/www/html/iPmartBotPanel/install/iPmart.install
 
 source_file="/var/www/html/iPmartBotPanel/config.php"
 destination_file="/var/www/html/iPmartBotPanel/config.php.tmp"
