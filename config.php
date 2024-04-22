@@ -369,6 +369,21 @@ function loginPanelSanayi($address, $username, $password) {
     return $response;
 }
 
+function loginPanelalireza($address, $username, $password) {
+    $ch = curl_init();
+    curl_setopt_array($ch, [
+        CURLOPT_URL => $address . '/login',
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => http_build_query(['username' => $username, 'password' => $password]),
+        CURLOPT_COOKIEJAR => 'cookie.txt',
+    ]);
+    $response = json_decode(curl_exec($ch), true);
+    curl_close($ch);
+    return $response;
+}
+
 function loginPanel($address, $username, $password) {
 	$fields = array('username' => $username, 'password' => $password);
     $curl = curl_init($address . '/api/admin/token');
@@ -572,7 +587,7 @@ $manage_server = json_encode(['keyboard' => [
 ], 'resize_keyboard' => true]);
 
 $select_panel = json_encode(['inline_keyboard' => [
-    [['text' => '▫سنایی', 'callback_data' => 'sanayi']],
+    [['text' => '▫سنایی', 'callback_data' => 'sanayi'], ['text' => '▫علیرضا', 'callback_data' => 'alireza']]
     [['text' => '▫️هیدیفای', 'callback_data' => 'hedifay'], ['text' => '▫️مرزبان', 'callback_data' => 'marzban']]
 ]]);
 
