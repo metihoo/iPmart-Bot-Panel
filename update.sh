@@ -48,9 +48,9 @@ do
             echo -e "\n"
             read -p "Are you sure you want to update? [y/n] : " answer
             if [ "$answer" != "${answer#[Yy]}" ]; then
-                if [ -d "/var/www/html/ZanborPanelBot" ]; then
-                    if [ -f "/var/www/html/ZanborPanelBot/install/iPmart.install" ]; then
-                        if [ -s "/var/www/html/iPmartPanelBot/install/iPmart.install" ]; then
+                if [ -d "/var/www/html/iPmartBotPanel" ]; then
+                    if [ -f "/var/www/html/iPmartBotPanel/install/iPmart.install" ]; then
+                        if [ -s "/var/www/html/iPmartBotPanel/install/iPmart.install" ]; then
                             colorized_echo green "Please wait, Updating . . ."
                             # update proccess !
                             sudo apt update && apt upgrade -y
