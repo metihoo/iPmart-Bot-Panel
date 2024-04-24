@@ -256,9 +256,10 @@ elseif ($text == '🎁 سرویس تستی (رایگان)' and $test_account_set
         
         try {
             if ($panel_fetch['type'] == 'marzban') {
-                # ------------ set proxies proccess ------------ #
+                # ---------------- set proxies and inbounds proccess for marzban panel ---------------- #
                 $protocols = explode('|', $panel_fetch['protocols']);
                 unset($protocols[count($protocols)-1]);
+                if ($protocols[0] == '') unset($protocols[0]);
                 $proxies = array();
                 foreach ($protocols as $protocol) {
                     if ($protocol == 'vless' and $panel_fetch['flow'] == 'flowon'){
@@ -267,15 +268,23 @@ elseif ($text == '🎁 سرویس تستی (رایگان)' and $test_account_set
                         $proxies[$protocol] = array();
                     }
                 }
+                
+                $panel_inbounds = $sql->query("SELECT * FROM `marzban_inbounds` WHERE `panel` = '{$panel_fetch['code']}'");
+                $inbounds = array();
+                foreach ($protocols as $protocol) {
+                    while ($row = $panel_inbounds->fetch_assoc()) {
+                        $inbounds[$protocol][] = $row['inbound'];
+                    }
+                }
                 # ---------------------------------------------- #
                 $code = rand(111111, 999999);
                 $name = base64_encode($code) . '_' . $from_id;
-                $create_service = createService($name, convertToBytes($test_account_setting['volume'].'GB'), strtotime("+ {$test_account_setting['time']} day"), $proxies, $panel_fetch['token'], $panel_fetch['login_link']);
+                $create_service = createService($name, convertToBytes($test_account_setting['volume'].'GB'), strtotime("+ {$test_account_setting['time']} hour"), $proxies, ($panel_inbounds->num_rows > 0) ? $inbounds : 'null', $panel_fetch['token'], $panel_fetch['login_link']);
                 $create_status = json_decode($create_service, true);
                 if (isset($create_status['username'])) {
                     $links = "";
                     foreach ($create_status['links'] as $link) $links .= $link . "\n\n";
-                    $subscribe = $panel_fetch['login_link'] . $create_status['subscription_url'];
+		    $subscribe = (strpos($create_status['subscription_url'], 'http') !== false) ? $create_status['subscription_url'] : $panel_fetch['login_link'] . $create_status['subscription_url'];
                     $sql->query("UPDATE `users` SET `count_service` = count_service + 1, `test_account` = 'yes' WHERE `from_id` = '$from_id'");
                     $sql->query("INSERT INTO `test_account` (`from_id`, `location`, `date`, `volume`, `link`, `price`, `code`, `status`) VALUES ('$from_id', '{$panel_fetch['name']}', '{$test_account_setting['date']}', '{$test_account_setting['volume']}', '$links', '0', '$code', 'active')");
                     deleteMessage($from_id, $message_id + 1);
@@ -291,7 +300,7 @@ elseif ($text == '🎁 سرویس تستی (رایگان)' and $test_account_set
                 $code = rand(111111, 999999);
                 $name = base64_encode($code) . '_' . $from_id;
                 $xui = new Sanayi($panel_fetch['login_link'], $panel_fetch['token']);
-                $san_setting = $sql->query("SELECT * FROM `sanayi_settings`")->fetch_assoc();
+                $san_setting = $sql->query("SELECT * FROM `sanayi_panel_setting` WHERE `code` = '{$panel_fetch['code']}'")->fetch_assoc();
                 $create_service = $xui->addClient($name, $san_setting['inbound_id'], $test_account_setting['volume'], ($test_account_setting['time'] / 24));
                 $create_status = json_decode($create_service, true);
                 $link = str_replace(['%s1', '%s2', '%s3'], [$create_status['results']['id'], str_replace(parse_url($panel_fetch['login_link'])['port'], json_decode($xui->getPortById($san_setting['inbound_id']), true)['port'], str_replace(['https://', 'http://'], ['', ''], $panel_fetch['login_link'])), $create_status['results']['remark']], $san_setting['example_link']);
@@ -791,7 +800,7 @@ $admins = $sql->query("SELECT * FROM `admins`")->fetch_assoc() ?? [];
 if ($from_id == $config['dev'] or in_array($from_id, $admins)) {
     if (in_array($text, ['/panel', 'panel', '🔧 مدیریت', 'پنل', '⬅️ بازگشت به مدیریت'])) {
         step('panel');
-       sendMessage($from_id, "👮‍♂️ - سلام ادمین [ <b>$first_name</b> ] عزیز !\n\n⚡️به پنل مدیریت ربات خوش آمدید.\n⚙️ جهت مدیریت ربات ، یکی از گزینه های زیر را انتخاب کنید.\n\n | برای اطلاع از تمامی آپدیت ها و نسخه های بعدی ربات ای پی مارت پنل در کانال ای پی مارت پنل عضو شید :↓\n◽️@ipmartpanel\n و همچنین برای نظر دهی آپدیت یا باگ ها به گروه ای پی مارت پنل بپیوندید :↓\n◽️@iPmartNetwork_GP", $panel);    
+       sendMessage($from_id, "👮‍♂️ - سلام ادمین [ <b>$first_name</b> ] عزیز !\n\n⚡️به پنل مدیریت ربات خوش آمدید.\n\n⚙️ جهت مدیریت ربات ، یکی از گزینه های زیر را انتخاب کنید.\n\n | برای اطلاع از تمامی آپدیت ها و نسخه های بعدی ربات ای پی مارت پنل در کانال ای پی مارت پنل عضو شید :↓\n◽️@ipmartpanel\n و همچنین برای نظر دهی آپدیت یا باگ ها به گروه ای پی مارت پنل بپیوندید :↓\n◽️@iPmartNetwork_GP", $panel);    
     }
     
     elseif($text == '👥 مدیریت آمار ربات'){
@@ -921,12 +930,10 @@ if ($from_id == $config['dev'] or in_array($from_id, $admins)) {
         step('none');
         // sendMessage($from_id, "{$test_account_setting['status']} - {$test_account_setting['panel']} - {$test_account_setting['volume']} - {$test_account_setting['time']}");
         // exit();
-    elseif ($text == '⏱ مدیریت اکانت تست' or $data == 'back_account_test') {
-        step('none');
         if (isset($text)) {
-            sendMessage($from_id, "⏱ به تنظیمات اکانت تست خوش آمدید.\n\n🟢 حجم را به صورت GB به ربات ارسال کنید | برای مثال 200 مگ : 0.2\n🟢 زمان را به صورت ساعت ارسال کنید | برای مثال 5 ساعت : 5\n\n👇🏻 یکی از گزینه های زیر را انتخاب کنید :\n◽️@ipmart_network", $manage_test_account);
+            sendMessage($from_id, "⏱ به تنظیمات اکانت تست خوش آمدید.\n\n🟢 حجم را به صورت GB به ربات ارسال کنید | برای مثال 200 مگ : 0.2\n🟢 زمان را به صورت ساعت ارسال کنید | برای مثال 5 ساعت : 5\n\n👇🏻 یکی از گزینه های زیر را انتخاب کنید :\n◽️@iPmart_Network", $manage_test_account);
         } else {
-            editMessage($from_id, "⏱ به تنظیمات اکانت تست خوش آمدید.\n\n🟢 حجم را به صورت GB به ربات ارسال کنید | برای مثال 200 مگ : 0.2\n🟢 زمان را به صورت ساعت ارسال کنید | برای مثال 5 ساعت : 5\n\n👇🏻 یکی از گزینه های زیر را انتخاب کنید :\n◽️@ipmartnetwork_gp", $message_id, $manage_test_account);
+            editMessage($from_id, "⏱ به تنظیمات اکانت تست خوش آمدید.\n\n🟢 حجم را به صورت GB به ربات ارسال کنید | برای مثال 200 مگ : 0.2\n🟢 زمان را به صورت ساعت ارسال کنید | برای مثال 5 ساعت : 5\n\n👇🏻 یکی از گزینه های زیر را انتخاب کنید :\n◽️@iPmart_Network", $message_id, $manage_test_account);
         }
     }
     
