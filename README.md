@@ -14,7 +14,15 @@
 
 
  ## آموزش راه اندازی و نصب ربات روی سرور
-- وارد سرور خود شوید. 
+- وارد سرور خود شوید.
+
+- برای اوبنتوی 20 به بالاتر قبل از وارد کردن دستور اسکریپت کد یز را وارد کنید
+
+  ```bash
+sudo systemctl stop apache2
+```
+
+
 - دستور زیر رو برای نصب ربات ارسال کنید.
 ```bash
 bash <(curl -s https://raw.githubusercontent.com/ipmartnetwork/iPmart-Bot-Panel/main/iPmart.sh)
