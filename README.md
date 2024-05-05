@@ -23,7 +23,7 @@
 
 
 
-- دستور زیر رو برای نصب ربات ارسال کنید.
+- دستور زیر رو برای نصب در سرور خود وارد و اینتر بزنید.
 ```bash
 bash <(curl -s https://raw.githubusercontent.com/ipmartnetwork/iPmart-Bot-Panel/main/iPmart.sh)
 
