@@ -5,7 +5,7 @@
 # Written By: iPmart Panel 
 # Channel: @iPmartPanel
 # Group: @iPmartNetwork_GP
- * Version: 1.4
+ * Version: 1.5
 **/
 
 include_once 'config.php';
@@ -2712,5 +2712,5 @@ if ($from_id == $config['dev'] or in_array($from_id, $admins)) {
 * Project name: iPmart_Network
 * Channel: @iPmart_Network
 * Group: @iPmart_NetworkGap
- * Version: 1.4
+ * Version: 1.5
 **/
