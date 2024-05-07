@@ -58,6 +58,16 @@ bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.
 7070537549:AAF4XrfBVhoiCsvODRmhLv8i-----s9Q
 ```
 
+
+
+## لینک نمونه برای ایجاد سرویس 
+
+
+```bash
+vless://%s1@%s2?type=tcp&security=none#%s3
+
+```
+
 ## امکانات ربات ای پی مارت پنل
 
 - مولتی پنل
